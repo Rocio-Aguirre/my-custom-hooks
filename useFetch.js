@@ -1,0 +1,43 @@
+import { useEffect, useRef, useState } from "react"
+
+const useFetch = ( url ) => {
+
+    const isMounted = useRef(true);
+
+    useEffect(() => {
+        return () =>{
+            isMounted.current = false;
+        }
+    }, [])
+
+   //{ !url && throw "error" } 
+    const [state, setState] = useState({ data: null, loading:true, error: null });
+    //Una vez recibimos url quiero disparar un efecto
+    useEffect(()=>{
+        setState({ data: null, loading:true, error: null });
+        fetch(url)
+        .then(resp => resp.json())
+        .then(data =>{
+                if(isMounted.current){
+                    setState({
+                        loading: false,
+                        error: null,
+                        data
+                    })
+                } else{
+                    console.log('setState no se llamó')
+                }
+        })
+        .catch(()=>{
+            setState({
+                data: null,
+                loading: false,
+                error: 'No se pudo cargar la info'
+            })
+        })
+    }, [url])
+
+    return state;
+}
+
+export default useFetch
